@@ -46,5 +46,6 @@ def load_data():
     return df
 df = load_data()
 st.dataframe(df)
+df["Date"] = pd.to_datetime(df["Date"], format="%Y-%m-%d")
 
      
