@@ -38,8 +38,7 @@ def apply_custom_css():
             margin-bottom: 25px;
         }
         .kpi-card {
-            background-color: #1f77b4;
-                color: black;
+            background-color: #ffffff;
             border-radius: 12px;
             padding: 20px;
             flex: 1;
@@ -81,7 +80,8 @@ def apply_custom_css():
         /* Buttons */
         .stButton>button {
             border-radius: 8px;
-            background-color: #ffffff;
+            background-color: #1f77b4;
+            color: white;
             font-weight: 600;
             border: none;
             padding: 0.5rem 1rem;
@@ -194,7 +194,7 @@ def render_sidebar(df):
         
     # Navigation
     st.sidebar.markdown("### Navigation")
-    pages = ["🏠 Home Dashboard", "📊 Dataset Viewer", "📈Exploratory Data Analysis", "💼 Business Insights", "🤖 Prediction Engine"]
+    pages = ["Home Dashboard", "Dataset Viewer", "Exploratory Data Analysis", "Business Insights", "Prediction Engine"]
     selected_page = st.sidebar.radio("Go to:", pages)
     st.sidebar.markdown("---")
     
