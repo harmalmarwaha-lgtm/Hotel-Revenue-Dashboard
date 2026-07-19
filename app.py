@@ -1,3 +1,7 @@
+"""
+Hotel Revenue Analysis Dashboard
+Developed using Python, Streamlit, Pandas, and Plotly.
+"""
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -21,7 +25,13 @@ st.set_page_config(
 # 2. CUSTOM CSS
 # ==========================================
 def apply_custom_css():
-    st.markdown("""
+     """
+    Injects custom CSS to style the Streamlit app with a modern, 
+    professional gradient theme, glassmorphism containers, 
+    hover effects, and KPI cards.
+    """
+st.markdown(
+        """
         <style>
         /* Main background and font */
         .stApp {
@@ -183,6 +193,7 @@ def load_data(uploaded_file=None):
 # ==========================================
 def render_sidebar(df):
     """Renders the sidebar and returns filtered dataset."""
+    st.sidebar.title("🏨 Hotel Dashboard")
     st.sidebar.markdown("## 🏨 Dashboard Settings")
     st.sidebar.markdown("---")
     
@@ -194,7 +205,7 @@ def render_sidebar(df):
         
     # Navigation
     st.sidebar.markdown("### Navigation")
-    pages = ["Home Dashboard", "Dataset Viewer", "Exploratory Data Analysis", "Business Insights", "Prediction Engine"]
+    pages = ["Home Dashboard", "Dataset Viewer", "Exploratory Data Analysis", "Business Insights", "Prediction Engine","Contact & Feedback"]
     selected_page = st.sidebar.radio("Go to:", pages)
     st.sidebar.markdown("---")
     
@@ -499,7 +510,7 @@ def render_home_dashboard(df):
 # 7. DATASET VIEWER PAGE
 # ==========================================
 def render_dataset_page(df):
-    st.markdown("## 📁 Dataset Viewer")
+    st.markdown("## 🗃️ Dataset Viewer")
     st.markdown("Explore the raw data, structure, and summary statistics.")
     
     if df.empty:
@@ -710,6 +721,38 @@ def render_prediction_page(df):
             res_col2.metric("Estimated Net Profit", f"${predicted_profit:,.2f}")
             
             st.progress(min(int((target_occ) * 100), 100), text=f"Occupancy Utilization: {target_occ*100:.1f}%")
+
+
+# ==========================================
+# 11. PAGE: CONTACT & FEEDBACK
+# ==========================================
+def render_feedback_page():
+    st.title("📬 Contact & Dashboard Feedback")
+    st.markdown("We value your input! Please rate your experience using the Hotel Dashboard.")
+
+    st.markdown("<div class='feedback-form'>", unsafe_allow_html=True)
+    
+    with st.form("feedback_form"):
+        st.markdown("#### User Feedback Form")
+        email = st.text_input("Hotel Contact Email", placeholder="manager@hotel.com")
+        
+        rating = st.radio(
+            "Rate your dashboard experience:",
+            ["⭐ (Poor)", "⭐⭐ (Fair)", "⭐⭐⭐ (Good)", "⭐⭐⭐⭐ (Very Good)", "⭐⭐⭐⭐⭐ (Excellent)"],
+            index=4
+        )
+        
+        comments = st.text_area("Additional Comments / Feature Requests", placeholder="I would love to see...")
+        
+        submitted = st.form_submit_button("Submit Feedback")
+        
+        if submitted:
+            if email:
+                st.success(f"Thank you! Your feedback ({rating}) has been recorded.")
+            else:
+                st.error("Please provide a valid email address.")
+                
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # ==========================================
 # 11. DOWNLOAD SECTION & FOOTER
