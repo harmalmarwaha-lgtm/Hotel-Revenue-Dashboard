@@ -10,6 +10,10 @@ import plotly.graph_objects as go
 import plotly.figure_factory as ff
 from datetime import datetime
 import base64
+from pathlib import Path
+
+
+DATA_FILE = Path(__file__).resolve().with_name("hotelrevenue.csv")
 
 # ==========================================
 # 1. PAGE CONFIGURATION
@@ -155,10 +159,10 @@ st.markdown(
 def load_data(uploaded_file=None):
     """Loads and preprocesses the hotel revenue dataset."""
     try:
-        if uploaded_file is not None:
-            df = pd.read_csv(uploaded_file)
-        else:
-            df = pd.read_csv("hotelrevenue.csv")
+        source = uploaded_file if uploaded_file is not None else DATA_FILE
+        # Resolve the bundled CSV from the app's folder, not Streamlit's
+        # current working directory (which varies depending on how it is run).
+        df = pd.read_csv(source, encoding="utf-8-sig")
             
         # Convert date column to datetime
         if 'Date' in df.columns:
@@ -182,7 +186,7 @@ def load_data(uploaded_file=None):
         return df
         
     except FileNotFoundError:
-        st.error("Error: 'hotelrevenue.csv' not found. Please upload the dataset in the sidebar.")
+        st.error(f"Error: Dataset not found at {DATA_FILE}. Please upload a CSV in the sidebar.")
         return pd.DataFrame()
     except Exception as e:
         st.error(f"An error occurred while loading data: {e}")
@@ -194,18 +198,21 @@ def load_data(uploaded_file=None):
 def render_sidebar(df):
     """Renders the sidebar and returns filtered dataset."""
     st.sidebar.title("🏨 Hotel Dashboard")
-    st.sidebar.markdown("## 🏨 Dashboard Settings")
     st.sidebar.markdown("---")
     
-    # Optional File Uploader
-    uploaded_file = st.sidebar.file_uploader("Upload Dataset (CSV)", type=['csv'])
-    
-    if df.empty and uploaded_file is None:
-        return pd.DataFrame(), "Home"
+    if df.empty:
+        return pd.DataFrame(), "Home Dashboard"
         
     # Navigation
     st.sidebar.markdown("### Navigation")
-    pages = ["Home Dashboard", "Dataset Viewer", "Exploratory Data Analysis", "Business Insights", "Prediction Engine","Contact & Feedback"]
+    pages = [
+        "Home Dashboard",
+        "Dataset Viewer",
+        "Exploratory Data Analysis",
+        "Business Insights",
+        "Prediction Engine",
+        "Contact & Feedback",
+    ]
     selected_page = st.sidebar.radio("Go to:", pages)
     st.sidebar.markdown("---")
     
@@ -257,7 +264,7 @@ def render_sidebar(df):
         if selected_vals:
             filtered_df = filtered_df[filtered_df[col].isin(selected_vals)]
             
-    return filtered_df, selected_page, uploaded_file
+    return filtered_df, selected_page
 
 # ==========================================
 # 5. KPI CARDS
@@ -730,11 +737,16 @@ def render_feedback_page():
     st.title("📬 Contact & Dashboard Feedback")
     st.markdown("We value your input! Please rate your experience using the Hotel Dashboard.")
 
+    # Added explicit contact email display
+    st.info("📧 **Direct Contact Email is:** support@hotelrevenue.com")
+
     st.markdown("<div class='feedback-form'>", unsafe_allow_html=True)
     
     with st.form("feedback_form"):
         st.markdown("#### User Feedback Form")
-        email = st.text_input("Hotel Contact Email", placeholder="manager@hotel.com")
+        
+        # User's contact email input
+        user_email = st.text_input("Your Contact Email", placeholder="user@example.com")
         
         rating = st.radio(
             "Rate your dashboard experience:",
@@ -747,13 +759,12 @@ def render_feedback_page():
         submitted = st.form_submit_button("Submit Feedback")
         
         if submitted:
-            if email:
-                st.success(f"Thank you! Your feedback ({rating}) has been recorded.")
+            if user_email:
+                st.success(f"Thank you! Your feedback ({rating}) has been recorded. We will reach out to {user_email} if needed.")
             else:
                 st.error("Please provide a valid email address.")
                 
     st.markdown("</div>", unsafe_allow_html=True)
-
 # ==========================================
 # 11. DOWNLOAD SECTION & FOOTER
 # ==========================================
@@ -785,16 +796,12 @@ def render_footer_and_downloads(df):
 def main():
     apply_custom_css()
     
-    # Load dataset
-    df_raw = load_data()
+    # An uploaded CSV takes precedence; otherwise use the CSV beside this file.
+    uploaded_file = st.sidebar.file_uploader("Upload Dataset (CSV)", type=['csv'])
+    df_raw = load_data(uploaded_file)
     
     # Render Sidebar and get filtered data
-    filtered_df, selected_page, uploaded_file = render_sidebar(df_raw)
-    
-    # If user uploads a new file, update raw data (override local)
-    if uploaded_file is not None and len(df_raw) == 0:
-         df_raw = load_data(uploaded_file)
-         filtered_df = df_raw.copy()
+    filtered_df, selected_page = render_sidebar(df_raw)
 
     # Route to selected page
     if selected_page == "Home Dashboard":
@@ -807,8 +814,8 @@ def main():
         render_insights_page(filtered_df)
     elif selected_page == "Prediction Engine":
         render_prediction_page(filtered_df)
-        
-    render_footer_and_downloads(filtered_df)
+    elif selected_page == "Contact & Feedback":
+        render_feedback_page()
 
 if __name__ == "__main__":
     main()
