@@ -1,7 +1,3 @@
-"""
-Hotel Revenue Analysis Dashboard
-Developed using Python, Streamlit, Pandas, and Plotly.
-"""
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -10,10 +6,6 @@ import plotly.graph_objects as go
 import plotly.figure_factory as ff
 from datetime import datetime
 import base64
-from pathlib import Path
-
-
-DATA_FILE = Path(__file__).resolve().with_name("hotelrevenue.csv")
 
 # ==========================================
 # 1. PAGE CONFIGURATION
@@ -24,18 +16,15 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+# Initialize Session States for global access
+if "feedback_data" not in st.session_state:
+    st.session_state.feedback_data = []
 
 # ==========================================
 # 2. CUSTOM CSS
 # ==========================================
 def apply_custom_css():
-     """
-    Injects custom CSS to style the Streamlit app with a modern, 
-    professional gradient theme, glassmorphism containers, 
-    hover effects, and KPI cards.
-    """
-st.markdown(
-        """
+    st.markdown("""
         <style>
         /* Main background and font */
         .stApp {
@@ -159,10 +148,10 @@ st.markdown(
 def load_data(uploaded_file=None):
     """Loads and preprocesses the hotel revenue dataset."""
     try:
-        source = uploaded_file if uploaded_file is not None else DATA_FILE
-        # Resolve the bundled CSV from the app's folder, not Streamlit's
-        # current working directory (which varies depending on how it is run).
-        df = pd.read_csv(source, encoding="utf-8-sig")
+        if uploaded_file is not None:
+            df = pd.read_csv(uploaded_file)
+        else:
+            df = pd.read_csv("hotelrevenue.csv")
             
         # Convert date column to datetime
         if 'Date' in df.columns:
@@ -186,7 +175,7 @@ def load_data(uploaded_file=None):
         return df
         
     except FileNotFoundError:
-        st.error(f"Error: Dataset not found at {DATA_FILE}. Please upload a CSV in the sidebar.")
+        st.error("Error: 'hotelrevenue.csv' not found. Please upload the dataset in the sidebar.")
         return pd.DataFrame()
     except Exception as e:
         st.error(f"An error occurred while loading data: {e}")
@@ -197,22 +186,18 @@ def load_data(uploaded_file=None):
 # ==========================================
 def render_sidebar(df):
     """Renders the sidebar and returns filtered dataset."""
-    st.sidebar.title("🏨 Hotel Dashboard")
+    st.sidebar.markdown("## 🏨 Dashboard Settings")
     st.sidebar.markdown("---")
     
-    if df.empty:
-        return pd.DataFrame(), "Home Dashboard"
+    # Optional File Uploader
+    uploaded_file = st.sidebar.file_uploader("Upload Dataset (CSV)", type=['csv'])
+    
+    if df.empty and uploaded_file is None:
+        return pd.DataFrame(), "Home"
         
     # Navigation
     st.sidebar.markdown("### Navigation")
-    pages = [
-        "Home Dashboard",
-        "Dataset Viewer",
-        "Exploratory Data Analysis",
-        "Business Insights",
-        "Prediction Engine",
-        "Contact & Feedback",
-    ]
+    pages = ["Home Dashboard", "Dataset Viewer", "Exploratory Data Analysis", "Business Insights", "Prediction Engine", "Feedback System Module Layer"]
     selected_page = st.sidebar.radio("Go to:", pages)
     st.sidebar.markdown("---")
     
@@ -264,7 +249,7 @@ def render_sidebar(df):
         if selected_vals:
             filtered_df = filtered_df[filtered_df[col].isin(selected_vals)]
             
-    return filtered_df, selected_page
+    return filtered_df, selected_page, uploaded_file
 
 # ==========================================
 # 5. KPI CARDS
@@ -517,7 +502,7 @@ def render_home_dashboard(df):
 # 7. DATASET VIEWER PAGE
 # ==========================================
 def render_dataset_page(df):
-    st.markdown("## 🗃️ Dataset Viewer")
+    st.markdown("## 📁 Dataset Viewer")
     st.markdown("Explore the raw data, structure, and summary statistics.")
     
     if df.empty:
@@ -729,44 +714,65 @@ def render_prediction_page(df):
             
             st.progress(min(int((target_occ) * 100), 100), text=f"Occupancy Utilization: {target_occ*100:.1f}%")
 
-
 # ==========================================
-# 11. PAGE: CONTACT & FEEDBACK
+# 11. FEEDBACK SYSTEM MODULE LAYER
 # ==========================================
-def render_feedback_page():
-    st.title("📬 Contact & Dashboard Feedback")
-    st.markdown("We value your input! Please rate your experience using the Hotel Dashboard.")
-
-    # Added explicit contact email display
-    st.info("📧 **Direct Contact Email is:** support@hotelrevenue.com")
-
-    st.markdown("<div class='feedback-form'>", unsafe_allow_html=True)
+def render_feedback_module(df):
+    st.markdown("<div class='dashboard-header'><h1>Feedback Architecture & Technical Support Support</h1><p>Submit software interface performance evaluations, bug matrices, data expansion requests or user rating maps directly.</p></div>", unsafe_allow_html=True)
     
-    with st.form("feedback_form"):
-        st.markdown("#### User Feedback Form")
+    f_col1, f_col2 = st.columns(2)
+    
+    with f_col1:
+        st.markdown("<div class='content-block'>", unsafe_allow_html=True)
+        st.markdown("### 📝 Submit Performance Audit Rating")
         
-        # User's contact email input
-        user_email = st.text_input("Your Contact Email", placeholder="user@example.com")
+        with st.form("feedback_system_form", clear_on_submit=True):
+            user_name = st.text_input("Corporate Staff Operator Identity Label / Full Name Name Input:")
+            user_role = st.selectbox("Designated Operational Department Tier Matrix:", ["Executive Leadership", "Revenue Management Analyst Team", "Hotel Front Desk Operations", "Corporate Finance Auditor", "IT Systems Engineering Admin"])
+            ux_rating = st.slider("Interface System Utility Usability Experience Score Index (1 Min - 5 Max Star Value):", 1, 5, 5)
+            user_notes = st.text_area("Detailed System Requests, Bug Submissions, Data Optimization Requirements:")
+            
+            submit_btn = st.form_submit_button("💾 Write Form Entry Logs Matrix to Session Storage")
+            
+            if submit_btn:
+                if user_name.strip() == "":
+                    st.error("Submission Denied Matrix Block: Please ensure you input a valid operator identity verification label name.")
+                else:
+                    feedback_packet = {
+                        "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "Operator Identity": user_name,
+                        "Department Unit": user_role,
+                        "UX Metric Rating": ux_rating,
+                        "Operational Notes Context": user_notes
+                    }
+                    st.session_state.feedback_data.append(feedback_packet)
+                    st.success("Success: Data packet payload ingested into current state buffer matrix storage successfully.")
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    with f_col2:
+        st.markdown("<div class='content-block'>", unsafe_allow_html=True)
+        st.markdown("### 📞 Enterprise Tier Corporate Technical Contact Desk Details")
+        st.markdown("""
+        For advanced data pipeline integrations, customized machine learning endpoint connectivity parameters or programmatic query adjustments, reach out to the core system administration:
         
-        rating = st.radio(
-            "Rate your dashboard experience:",
-            ["⭐ (Poor)", "⭐⭐ (Fair)", "⭐⭐⭐ (Good)", "⭐⭐⭐⭐ (Very Good)", "⭐⭐⭐⭐⭐ (Excellent)"],
-            index=4
-        )
-        
-        comments = st.text_area("Additional Comments / Feature Requests", placeholder="I would love to see...")
-        
-        submitted = st.form_submit_button("Submit Feedback")
-        
-        if submitted:
-            if user_email:
-                st.success(f"Thank you! Your feedback ({rating}) has been recorded. We will reach out to {user_email} if needed.")
-            else:
-                st.error("Please provide a valid email address.")
-                
-    st.markdown("</div>", unsafe_allow_html=True)
+        *   **Global Systems Technical Architecture Admin Email Support Desk:** `bi-support-architecture@hrev-core-analytics.internal`
+        *   **Internal Data Core Infrastructure Extension Interface Call-Routing Node:** `+1 (555) 893-4921`
+        *   **Corporate Security Framework Deployment Version Control Level Matrix ID:** `SEC-PROD-2026-V8`
+        *   **Database Synchronization Node Engine Status:** `ONLINE (Healthy Active Pulse)`
+        """)
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.subheader("📜 Current Runtime Volatile Application Feedback Audit Trace Logs")
+    if len(st.session_state.feedback_data) == 0:
+        st.info("Log Trace State Index Empty: No feedback form submissions have been recorded within the active temporal memory buffer array pool yet.")
+    else:
+        log_df = pd.DataFrame(st.session_state.feedback_data)
+        st.dataframe(log_df, use_container_width=True)
+
+
 # ==========================================
-# 11. DOWNLOAD SECTION & FOOTER
+# 12. OWNLOAD SECTION & FOOTER
 # ==========================================
 def render_footer_and_downloads(df):
     st.markdown("---")
@@ -791,17 +797,21 @@ def render_footer_and_downloads(df):
         )
 
 # ==========================================
-# 12. MAIN APP EXECUTION
+# 13. MAIN APP EXECUTION
 # ==========================================
 def main():
     apply_custom_css()
     
-    # An uploaded CSV takes precedence; otherwise use the CSV beside this file.
-    uploaded_file = st.sidebar.file_uploader("Upload Dataset (CSV)", type=['csv'])
-    df_raw = load_data(uploaded_file)
+    # Load dataset
+    df_raw = load_data()
     
     # Render Sidebar and get filtered data
-    filtered_df, selected_page = render_sidebar(df_raw)
+    filtered_df, selected_page, uploaded_file = render_sidebar(df_raw)
+    
+    # If user uploads a new file, update raw data (override local)
+    if uploaded_file is not None and len(df_raw) == 0:
+         df_raw = load_data(uploaded_file)
+         filtered_df = df_raw.copy()
 
     # Route to selected page
     if selected_page == "Home Dashboard":
@@ -814,8 +824,10 @@ def main():
         render_insights_page(filtered_df)
     elif selected_page == "Prediction Engine":
         render_prediction_page(filtered_df)
-    elif selected_page == "Contact & Feedback":
-        render_feedback_page()
+    elif selected_page == "Feedback System Module Layer":
+        render_feedback_module(filtered_df)
+    else:
+        render_footer_and_downloads(filtered_df)
 
 if __name__ == "__main__":
     main()
