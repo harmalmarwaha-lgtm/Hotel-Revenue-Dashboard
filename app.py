@@ -356,6 +356,7 @@ def render_home_dashboard(df):
                               line_shape='spline', color_discrete_sequence=['#1f77b4'])
                 fig1.update_traces(fill='tozeroy', fillcolor='rgba(31, 119, 180, 0.2)')
                 st.plotly_chart(update_layout(fig1, "Monthly Revenue Trend"), use_container_width=True)
+                st.info("💡 **Key Insight:** Identifies peak and off-season revenue months, enabling management to implement dynamic pricing strategies during high-demand periods.")
             except Exception as e: st.error(f"Chart error: {e}")
             
             # 2. Revenue by 'Hotel' mapped to Booking_Channel
@@ -364,6 +365,7 @@ def render_home_dashboard(df):
                 fig2 = px.bar(channel_rev, x='Booking_Channel', y='Total_Revenue', color='Booking_Channel',
                              color_discrete_sequence=px.colors.qualitative.Pastel)
                 st.plotly_chart(update_layout(fig2, "Revenue by Channel (Hotel Substitute)"), use_container_width=True)
+                st.info("💡 **Key Insight:** Highlights top-performing revenue channels, helping negotiate better commission terms and incentivize higher-margin direct bookings.")
             except Exception as e: st.error(f"Chart error: {e}")
             
         with col2:
@@ -372,6 +374,7 @@ def render_home_dashboard(df):
                 country_rev = df.groupby('Guest_Country')['Total_Revenue'].sum().reset_index().sort_values('Total_Revenue', ascending=False).head(10)
                 fig3 = px.bar(country_rev, y='Guest_Country', x='Total_Revenue', orientation='h', color='Total_Revenue', color_continuous_scale='Blues')
                 st.plotly_chart(update_layout(fig3, "Top 10 Revenue by Country (City Substitute)"), use_container_width=True)
+                st.info("💡 **Key Insight:** Pinpoints primary geographic markets to run targeted regional marketing campaigns and offer localized guest services.")
             except Exception as e: st.error(f"Chart error: {e}")
             
             # 4. Revenue by 'Room Type' mapped to Market_Segment
@@ -380,6 +383,7 @@ def render_home_dashboard(df):
                 fig4 = px.pie(segment_rev, names='Market_Segment', values='Total_Revenue', hole=0.4,
                              color_discrete_sequence=px.colors.qualitative.Set2)
                 st.plotly_chart(update_layout(fig4, "Revenue by Market Segment (Room Type Substitute)"), use_container_width=True)
+                st.info("💡 **Key Insight:** Reveals which guest segment generates the highest revenue share, guiding customized loyalty programs and corporate rate structures.")
             except Exception as e: st.error(f"Chart error: {e}")
 
     with tab2:
@@ -395,6 +399,7 @@ def render_home_dashboard(df):
                 fig5 = px.pie(status_df, names='Status', values='Count', color='Status', 
                              color_discrete_map={'Completed':'#2ca02c', 'Cancelled':'#d62728', 'No Show':'#ff7f0e'})
                 st.plotly_chart(update_layout(fig5, "Booking Status Distribution"), use_container_width=True)
+                st.info("💡 **Key Insight:** Measures revenue leakage due to non-fulfillment and supports stricter cancellation policies during volatile booking windows.")
             except Exception as e: st.error(f"Chart error: {e}")
             
             # 6. Monthly Booking Trend
@@ -403,6 +408,7 @@ def render_home_dashboard(df):
                 fig6 = px.bar(monthly_bookings, x='Month', y='Bookings', text='Bookings', color_discrete_sequence=['#9467bd'])
                 fig6.update_traces(textposition='outside')
                 st.plotly_chart(update_layout(fig6, "Monthly Booking Trend"), use_container_width=True)
+                st.info("💡 **Key Insight:** Correlates booking volume with overall revenue to optimize front-desk staffing and resource allocation during busy months.")
             except Exception as e: st.error(f"Chart error: {e}")
             
             # 7. Cancellation Analysis (Month vs Cancellations)
@@ -412,6 +418,7 @@ def render_home_dashboard(df):
                 fig7.add_trace(go.Scatter(x=monthly_cancel['Month'], y=monthly_cancel['Cancellations'], mode='lines+markers',
                                          line=dict(color='red', width=3), marker=dict(size=8)))
                 st.plotly_chart(update_layout(fig7, "Cancellation Analysis Trend"), use_container_width=True)
+                st.info("💡 **Key Insight:** Identifies specific high-cancellation months to introduce non-refundable discounted rates or mandatory advance deposits.")
             except Exception as e: st.error(f"Chart error: {e}")
             
         with col4:
@@ -420,6 +427,7 @@ def render_home_dashboard(df):
                 occ_trend = df.groupby('Date')['Occupancy_Rate'].mean().reset_index()
                 fig8 = px.area(occ_trend, x='Date', y='Occupancy_Rate', color_discrete_sequence=['#17becf'])
                 st.plotly_chart(update_layout(fig8, "Daily Occupancy Rate Analysis"), use_container_width=True)
+                st.info("💡 **Key Insight:** Monitors room utilization density over time to assist with dynamic inventory allocation and overbooking risk management.")
             except Exception as e: st.error(f"Chart error: {e}")
             
             # 9. Weekend vs Weekday Revenue
@@ -427,12 +435,14 @@ def render_home_dashboard(df):
                 wd_rev = df.groupby('Weekday')['Total_Revenue'].mean().reset_index()
                 fig9 = px.bar(wd_rev, x='Weekday', y='Total_Revenue', color='Total_Revenue', color_continuous_scale='Viridis')
                 st.plotly_chart(update_layout(fig9, "Average Revenue: Weekday vs Weekend"), use_container_width=True)
+                st.info("💡 **Key Insight:** Evaluates corporate mid-week traffic against weekend leisure travel to design targeted weekend promotional packages.")
             except Exception as e: st.error(f"Chart error: {e}")
             
             # 10. Stay Duration Proxy (Checkouts vs Checkins correlation or ADR distribution)
             try:
                 fig10 = px.histogram(df, x='ADR', nbins=20, marginal="box", color_discrete_sequence=['#e377c2'])
                 st.plotly_chart(update_layout(fig10, "ADR Distribution (Stay Value Proxy)"), use_container_width=True)
+                st.info("💡 **Key Insight:** Shows common pricing sweet spots and outlier rate spikes, helping calibrate standard base rates against market demand.")
             except Exception as e: st.error(f"Chart error: {e}")
 
     with tab3:
@@ -445,6 +455,7 @@ def render_home_dashboard(df):
                 fig11 = px.pie(guest_type, names='Guest_Type', values='Bookings', hole=0.5,
                               color_discrete_sequence=px.colors.qualitative.Safe)
                 st.plotly_chart(update_layout(fig11, "Guest Type Distribution"), use_container_width=True)
+                st.info("💡 **Key Insight:** Outlines guest demographics to help tailor room amenities, dining menus, and specialized guest services.")
             except Exception as e: st.error(f"Chart error: {e}")
             
             # 12. Payment Method mapped to Season
@@ -453,6 +464,7 @@ def render_home_dashboard(df):
                 fig12 = px.bar(season_rev, x='Season', y='Total_Revenue', color='Season',
                               color_discrete_sequence=px.colors.qualitative.Vivid)
                 st.plotly_chart(update_layout(fig12, "Revenue by Season (Payment Proxy)"), use_container_width=True)
+                st.info("💡 **Key Insight:** Demonstrates seasonal revenue variance to help align annual operating budgets and seasonal marketing spend.")
             except Exception as e: st.error(f"Chart error: {e}")
             
         with col6:
@@ -460,6 +472,7 @@ def render_home_dashboard(df):
             try:
                 fig13 = px.histogram(df, x='Average_Review_Score', nbins=10, color_discrete_sequence=['#bcbd22'])
                 st.plotly_chart(update_layout(fig13, "Review Score Distribution"), use_container_width=True)
+                st.info("💡 **Key Insight:** Gauges overall guest satisfaction levels to highlight service quality standard adherence and point out areas for service improvement.")
             except Exception as e: st.error(f"Chart error: {e}")
             
             # 14. Room Revenue Comparison
@@ -467,6 +480,7 @@ def render_home_dashboard(df):
                 fig14 = px.scatter(df, x='Room_Revenue', y='Total_Revenue', color='Season', size='Occupancy_Rate',
                                   hover_data=['Date'])
                 st.plotly_chart(update_layout(fig14, "Room Revenue vs Total Revenue"), use_container_width=True)
+                st.info("💡 **Key Insight:** Highlights how effectively auxiliary revenue streams (F&B, Spa, Laundry) scale alongside room booking income.")
             except Exception as e: st.error(f"Chart error: {e}")
 
     with tab4:
@@ -486,6 +500,7 @@ def render_home_dashboard(df):
                 )
                 fig15 = update_layout(fig15, "Financial Metrics Correlation Heatmap")
                 st.plotly_chart(fig15, use_container_width=True)
+                st.info("💡 **Key Insight:** Reveals strong numerical relationships, showing how marketing investments and occupancy increases directly drive bottom-line profit.")
             except Exception as e: st.error(f"Chart error: {e}")
             
         with col8:
@@ -496,6 +511,7 @@ def render_home_dashboard(df):
                 fig16 = px.bar(costs_df, x='Cost_Type', y='Amount', color='Cost_Type', text_auto=True,
                               color_discrete_sequence=['#ff9896', '#c5b0d5', '#c49c94'])
                 st.plotly_chart(update_layout(fig16, "Overall Costs Distribution"), use_container_width=True)
+                st.info("💡 **Key Insight:** Categorizes expense structures to help identify operational inefficiencies and highlight targets for cost-reduction initiatives.")
             except Exception as e: st.error(f"Chart error: {e}")
 
 # ==========================================
@@ -772,7 +788,7 @@ def render_feedback_module(df):
 
 
 # ==========================================
-# 12. OWNLOAD SECTION & FOOTER
+# 12. DOWNLOAD SECTION & FOOTER
 # ==========================================
 def render_footer_and_downloads(df):
     st.markdown("---")
